@@ -8,7 +8,6 @@ import org.poo.fileio.GameInput;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.RecursiveTask;
 
 public class Commands {
     private String command;
@@ -25,11 +24,11 @@ public class Commands {
         } else if (command.equals("cardUsesAttack")) {
             cardUsesAttackFunction(table, output, mapper, currentAction, game, player1, player2);
         } else if (command.equals("cardUsesAbility")) {
-            ;
+            cardUsesAbilityFunction(player1, player2, game, output, mapper, currentAction, table);
         } else if (command.equals("useAttackHero")) {
             useAttackHeroFunction(table, output, mapper, player1, player2, game, currentAction);
         } else if (command.equals("useHeroAbility")) {
-            ;
+            useHeroAbilityFunction(currentAction, table, output, mapper, player1, player2, game);
         } else if (command.equals("getCardsInHand")) {
             getCardsInHandFunction(player1, player2, currentAction.getPlayerIdx(), output, mapper);
         } else if (command.equals("getPlayerDeck")) {
@@ -480,7 +479,187 @@ public class Commands {
         }
     }
 
+    public void cardUsesAbilityFunction(Player player1, Player player2, Game game, ArrayNode output, ObjectMapper mapper, ActionsInput actionInput, Table table) {
 
+        int xOfAttacker = actionInput.getCardAttacker().getX();
+        int yOfAttacker = actionInput.getCardAttacker().getY();
+        if (table.getCards().size() <= xOfAttacker || table.getCards().get(xOfAttacker).size() <= yOfAttacker) {
+            return;
+        }
+
+        Card attacker = table.getCards().get(xOfAttacker).get(yOfAttacker);
+
+        int xOfAttacked = actionInput.getCardAttacked().getX();
+        int yOfAttacked = actionInput.getCardAttacked().getY();
+        if (table.getCards().size() <= xOfAttacked || table.getCards().get(xOfAttacked).size() <= yOfAttacked) {
+            return;
+        }
+
+        Card attacked = table.getCards().get(xOfAttacked).get(yOfAttacked);
+        if (attacker instanceof Disciple)
+            System.out.println("DISCIPLE");
+        if (attacker instanceof Miraj)
+            System.out.println("Miraj");
+        if (attacker instanceof TheCursedOne)
+            System.out.println("TheCursedOne");
+        if (attacker instanceof TheRipper)
+            System.out.println("TheRipper");
+
+        ObjectNode node = errorfunction(mapper, xOfAttacker, yOfAttacker, xOfAttacked, yOfAttacked);
+
+        if (attacker.isFrozen()) {
+            node.put("error", "Attacked card is frozen.");
+            output.add(node);
+            return;
+        }
+
+        if (attacker.isHasAttacked()) {
+            node.put("error", "Attacker card has already attacked this turn.");
+            output.add(node);
+            return;
+        }
+
+        if (attacker.getName().equals("Disciple")) {
+            if (game.getTurn() == 1 && xOfAttacked < 2) {
+                node.put("error", "Attacked card does not belong to the current player.");
+                output.add(node);
+                return;
+            } else if (game.getTurn() == 2 && xOfAttacked > 1) {
+                node.put("error", "Attacked card does not belong to the current player.");
+                output.add(node);
+                return;
+            }
+        }
+
+        if (attacker.getName().equals("Miraj") || attacker.getName().equals("The Ripper") || attacker.getName().equals("The Cursed One")) {
+            if (game.getTurn() == 1 && xOfAttacked > 1) {
+                node.put("error", "Attacked card does not belong to the enemy.");
+                output.add(node);
+                return;
+            } else if (game.getTurn() == 2 && xOfAttacked < 2) {
+                node.put("error", "Attacked card does not belong to the enemy.");
+                output.add(node);
+                return;
+            }
+
+            if (game.getTurn() == 1 && player2.getHasTank() == 1 && xOfAttacked != 1) {
+                node.put("error", "Attacked card is not of type 'Tank’.");
+                output.add(node);
+                return;
+            }
+
+            if (game.getTurn() == 2 && player1.getHasTank() == 1 && xOfAttacked != 2) {
+                node.put("error", "Attacked card is not of type 'Tank’.");
+                output.add(node);
+                return;
+            }
+        }
+
+        if (attacker instanceof Disciple)
+            System.out.println("DISCIPLE");
+        if (attacker instanceof Miraj)
+            System.out.println("Miraj");
+        if (attacker instanceof TheCursedOne)
+            System.out.println("TheCursedOne");
+        if (attacker instanceof TheRipper)
+            System.out.println("TheRipper");
+        attacker.useAbility(attacker, attacked);
+
+        if (attacked.getHealth() < 1) {
+            table.getCards().get(xOfAttacked).remove(yOfAttacked);
+
+            Player currentPlayer = player1;
+            if (game.getTurn() == 2)
+                currentPlayer = player2;
+
+            int tank = 0;
+            for (int i = 0; i < table.getCards().get(xOfAttacked).size(); i++) {
+                Card card = table.getCards().get(xOfAttacked).get(i);
+                if (card.getName().equals("Goliath") || card.getName().equals("Warden")) {
+                    tank = 1;
+                    break;
+                }
+            }
+
+            currentPlayer.setHasTank(tank);
+        }
+    }
+    public ObjectNode errorfunction(ObjectMapper mapper, int xOfAttacker, int yOfAttacker, int xOfAttacked, int yOfAttacked) {
+        ObjectNode node = mapper.createObjectNode();
+        node.put("command", "cardUsesAbility");
+
+        ObjectNode attackerNode = mapper.createObjectNode();
+        attackerNode.put("x", xOfAttacker);
+        attackerNode.put("y", yOfAttacker);
+        node.set("cardAttacker", attackerNode);
+
+        ObjectNode attackedNode = mapper.createObjectNode();
+        attackedNode.put("x", xOfAttacked);
+        attackedNode.put("y", yOfAttacked);
+        node.set("cardAttacked", attackedNode);
+
+        return node;
+    }
+
+    public void useHeroAbilityFunction(ActionsInput actionInput, Table table, ArrayNode output, ObjectMapper mapper, Player player1, Player player2, Game game) {
+        Player currentPlayer = player1;
+        if (game.getTurn() == 2)
+            currentPlayer = player2;
+        Hero hero = currentPlayer.getHero();
+
+        ObjectNode node = mapper.createObjectNode();
+        node.put("command", "useHeroAbility");
+        node.put("affectedRow", actionInput.getAffectedRow());
+
+        if (currentPlayer.getMana() < hero.getCostMana()) {
+            node.put("error", "Not enough mana to use hero's ability.");
+            return;
+        }
+
+        if (hero.isHasAttacked()) {
+            node.put("error", "Hero has already attacked this turn.");
+            return;
+        }
+
+        if (hero.getName().equals("Lord Royce") || hero.getName().equals("Empress Thorina")) {
+            if (game.getTurn() == 1 && actionInput.getAffectedRow() > 1) {
+                node.put("error", "Selected row does not belong to the enemy.");
+                return;
+            } else if (game.getTurn() == 2 && actionInput.getAffectedRow() < 2) {
+                node.put("error", "Selected row does not belong to the enemy.");
+                return;
+            }
+        }
+
+        if (hero.getName().equals("General Kocioraw") || hero.getName().equals("King Mudface")) {
+            if (game.getTurn() == 1 && actionInput.getAffectedRow() < 2) {
+                node.put("error", "Selected row does not belong to the current player.");
+                return;
+            } else if (game.getTurn() == 2 && actionInput.getAffectedRow() > 1) {
+                node.put("error", "Selected row does not belong to the current player.");
+                return;
+            }
+        }
+
+        hero.useAbility(table, actionInput.getAffectedRow());
+
+        if (hero.getName().equals("Empress Thorina")) {
+            currentPlayer = player1;
+            if (game.getTurn() == 2)
+                currentPlayer = player2;
+
+            int tank = 0;
+            for (int i = 0; i < table.getCards().get(actionInput.getAffectedRow()).size(); i++) {
+                Card card = table.getCards().get(actionInput.getAffectedRow()).get(i);
+                if (card.getName().equals("Goliath") || card.getName().equals("Warden")) {
+                    tank = 1;
+                    break;
+                }
+            }
+
+            currentPlayer.setHasTank(tank);
+        }
+    }
 
     public Commands() {
         this.command = "";

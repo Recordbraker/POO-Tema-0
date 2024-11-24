@@ -517,6 +517,17 @@
   },
   "error" : "Attacked card is not of type 'Tank'."
 }, {
+  "command" : "cardUsesAbility",
+  "cardAttacker" : {
+    "x" : 2,
+    "y" : 2
+  },
+  "cardAttacked" : {
+    "x" : 0,
+    "y" : 0
+  },
+  "error" : "Attacked card is not of type 'Tank’."
+}, {
   "command" : "getCardAtPosition",
   "x" : 1,
   "y" : 0,

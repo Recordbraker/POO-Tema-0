@@ -56,11 +56,29 @@ public class Game {
     public void beginRound(Player player1, Player player2, GameInput currentGame, Game game, Table table) {
         if (!player1.getDecks().get(player1.getIndexDeck()).isEmpty()) {
             player1.getCardsInHand().add(player1.getDecks().get(player1.getIndexDeck()).get(0));
+            Card attacker = player1.getDecks().get(player1.getIndexDeck()).get(0);
+            if (attacker instanceof Disciple)
+                System.out.println("DISCIPLE");
+            if (attacker instanceof Miraj)
+                System.out.println("Miraj");
+            if (attacker instanceof TheCursedOne)
+                System.out.println("TheCursedOne");
+            if (attacker instanceof TheRipper)
+                System.out.println("TheRipper");
             player1.getDecks().get(player1.getIndexDeck()).remove(0);
         }
 
         if (!player2.getDecks().get(player2.getIndexDeck()).isEmpty()) {
             player2.getCardsInHand().add(player2.getDecks().get(player2.getIndexDeck()).get(0));
+            Card attacker = player2.getDecks().get(player2.getIndexDeck()).get(0);
+            if (attacker instanceof Disciple)
+                System.out.println("DISCIPLE");
+            if (attacker instanceof Miraj)
+                System.out.println("Miraj");
+            if (attacker instanceof TheCursedOne)
+                System.out.println("TheCursedOne");
+            if (attacker instanceof TheRipper)
+                System.out.println("TheRipper");
             player2.getDecks().get(player2.getIndexDeck()).remove(0);
         }
 

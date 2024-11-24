@@ -364,6 +364,17 @@
   "playerIdx" : 2,
   "output" : 50
 }, {
+  "command" : "cardUsesAbility",
+  "cardAttacker" : {
+    "x" : 1,
+    "y" : 0
+  },
+  "cardAttacked" : {
+    "x" : 0,
+    "y" : 0
+  },
+  "error" : "Attacked card does not belong to the enemy."
+}, {
   "command" : "getPlayerTurn",
   "output" : 2
 }, {
@@ -400,6 +411,17 @@
     "colors" : [ "Green", "Yellow", "Blue" ],
     "name" : "Disciple"
   }
+}, {
+  "command" : "cardUsesAbility",
+  "cardAttacker" : {
+    "x" : 0,
+    "y" : 0
+  },
+  "cardAttacked" : {
+    "x" : 2,
+    "y" : 0
+  },
+  "error" : "Attacked card does not belong to the current player."
 }, {
   "command" : "getCardAtPosition",
   "x" : 3,
@@ -503,6 +525,17 @@
     "name" : "Disciple"
   }
 }, {
+  "command" : "cardUsesAbility",
+  "cardAttacker" : {
+    "x" : 0,
+    "y" : 2
+  },
+  "cardAttacked" : {
+    "x" : 1,
+    "y" : 0
+  },
+  "error" : "Attacked card does not belong to the enemy."
+}, {
   "command" : "getCardAtPosition",
   "x" : 2,
   "y" : 0,
@@ -547,6 +580,17 @@
 }, {
   "command" : "getFrozenCardsOnTable",
   "output" : [ ]
+}, {
+  "command" : "cardUsesAbility",
+  "cardAttacker" : {
+    "x" : 3,
+    "y" : 4
+  },
+  "cardAttacked" : {
+    "x" : 1,
+    "y" : 1
+  },
+  "error" : "Attacker card has already attacked this turn."
 }, {
   "command" : "getCardAtPosition",
   "x" : 0,

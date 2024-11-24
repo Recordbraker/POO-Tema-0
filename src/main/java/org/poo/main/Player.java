@@ -33,12 +33,34 @@ public class Player {
             ArrayList<Card> deck = new ArrayList<>();
             this.decks.add(deck);
             for (int j = 0; j < numberOfCards; j++) {
-                Card card = new Card(input.getDecks().get(i).get(j));
-                this.decks.get(i).add(card);
+                Card card;
+                String name = input.getDecks().get(i).get(j).getName();
+
+                if (name.equals("Miraj")) {
+                    this.decks.get(i).add(new Miraj(input.getDecks().get(i).get(j)));
+                } else if(name.equals("The Ripper")) {
+                    this.decks.get(i).add(new TheRipper(input.getDecks().get(i).get(j)));
+                } else if (name.equals("The Cursed One")) {
+                    this.decks.get(i).add(new TheCursedOne(input.getDecks().get(i).get(j)));
+                } else if (name.equals("Disciple")) {
+                    this.decks.get(i).add(new Disciple(input.getDecks().get(i).get(j)));
+                } else {
+                    this.decks.get(i).add(new Card(input.getDecks().get(i).get(j)));
+                }
             }
         }
 
-        this.hero = new Hero(hero);
+        if (hero.getName().equals("Lord Royce")) {
+            this.hero = new LordRoyce(hero);
+        } else if (hero.getName().equals("Empress Thorina")) {
+            this.hero = new EmpressThorina(hero);
+        } else if (hero.getName().equals("King Mudface")) {
+            this.hero = new KingMudface(hero);
+        } else if (hero.getName().equals("General Kocioraw")) {
+            this.hero = new GeneralKocioraw(hero);
+        } else {
+            this.hero = new Hero(hero);
+        }
 
         this.cardsInHand = new ArrayList<>();
     }

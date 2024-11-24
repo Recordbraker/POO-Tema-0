@@ -26,6 +26,10 @@ public class Card {
         this.hasAttacked = false;
     }
 
+    public void useAbility(Card attacker, Card attacked) {
+        System.out.println("APELATA DIN CARD");
+    }
+
     public void addHealth(int amount) {
         this.health = this.health + amount;
     }
