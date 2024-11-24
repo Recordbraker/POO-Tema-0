@@ -94,10 +94,10 @@ public final class Main {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Game game = new Game(new Player(inputData.getPlayerOneDecks(), inputData.getGames().get(0).getStartGame().getPlayerOneHero()), new Player(inputData.getPlayerTwoDecks(), inputData.getGames().get(0).getStartGame().getPlayerOneHero()));
 
         for (int i = 0; i < inputData.getGames().size(); i++) {
 
+            Game game = new Game(new Player(inputData.getPlayerOneDecks(), inputData.getGames().get(i).getStartGame().getPlayerOneHero()), new Player(inputData.getPlayerTwoDecks(), inputData.getGames().get(i).getStartGame().getPlayerOneHero()));
             Player player1 = game.getPlayer1();
             Player player2 = game.getPlayer2();
             GameInput currentGame = inputData.getGames().get(i);

@@ -33,7 +33,6 @@ public class Player {
             ArrayList<Card> deck = new ArrayList<>();
             this.decks.add(deck);
             for (int j = 0; j < numberOfCards; j++) {
-                Card card;
                 String name = input.getDecks().get(i).get(j).getName();
 
                 if (name.equals("Miraj")) {

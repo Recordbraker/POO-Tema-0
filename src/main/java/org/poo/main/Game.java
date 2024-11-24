@@ -56,29 +56,11 @@ public class Game {
     public void beginRound(Player player1, Player player2, GameInput currentGame, Game game, Table table) {
         if (!player1.getDecks().get(player1.getIndexDeck()).isEmpty()) {
             player1.getCardsInHand().add(player1.getDecks().get(player1.getIndexDeck()).get(0));
-            Card attacker = player1.getDecks().get(player1.getIndexDeck()).get(0);
-            if (attacker instanceof Disciple)
-                System.out.println("DISCIPLE");
-            if (attacker instanceof Miraj)
-                System.out.println("Miraj");
-            if (attacker instanceof TheCursedOne)
-                System.out.println("TheCursedOne");
-            if (attacker instanceof TheRipper)
-                System.out.println("TheRipper");
             player1.getDecks().get(player1.getIndexDeck()).remove(0);
         }
 
         if (!player2.getDecks().get(player2.getIndexDeck()).isEmpty()) {
             player2.getCardsInHand().add(player2.getDecks().get(player2.getIndexDeck()).get(0));
-            Card attacker = player2.getDecks().get(player2.getIndexDeck()).get(0);
-            if (attacker instanceof Disciple)
-                System.out.println("DISCIPLE");
-            if (attacker instanceof Miraj)
-                System.out.println("Miraj");
-            if (attacker instanceof TheCursedOne)
-                System.out.println("TheCursedOne");
-            if (attacker instanceof TheRipper)
-                System.out.println("TheRipper");
             player2.getDecks().get(player2.getIndexDeck()).remove(0);
         }
 
@@ -96,6 +78,39 @@ public class Game {
 
         this.setTurn(currentGame.getStartGame().getStartingPlayer());
         table.resetAttackStatus();
+        player1.getHero().setHasAttacked(false);
+        player2.getHero().setHasAttacked(false);
+    }
+
+    public void analyzeTank(Player player1, Player player2, Table table) {
+        ArrayList< ArrayList <Card> > cards;
+        cards = table.getCards();
+        int tank = 0;
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < cards.get(i).size(); j++) {
+                Card card = cards.get(i).get(j);
+                if (card.getName().equals("Goliath") || card.getName().equals("Warden")) {
+                    tank = 1;
+                    break;
+                }
+            }
+        }
+
+        player1.setHasTank(tank);
+
+        tank = 0;
+
+        for (int i = 2; i < 4; i++) {
+            for (int j = 0; j < cards.get(i).size(); j++) {
+                Card card = cards.get(i).get(j);
+                if (card.getName().equals("Goliath") || card.getName().equals("Warden")) {
+                    tank = 1;
+                    break;
+                }
+            }
+        }
+
+        player2.setHasTank(tank);
     }
 
     public int getRounds() {

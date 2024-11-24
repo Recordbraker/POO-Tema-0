@@ -388,6 +388,8 @@ public class Commands {
             }
 
             currentPlayer.setHasTank(tank);
+
+            game.analyzeTank(player1, player2, table);
         }
     }
 
@@ -496,14 +498,6 @@ public class Commands {
         }
 
         Card attacked = table.getCards().get(xOfAttacked).get(yOfAttacked);
-        if (attacker instanceof Disciple)
-            System.out.println("DISCIPLE");
-        if (attacker instanceof Miraj)
-            System.out.println("Miraj");
-        if (attacker instanceof TheCursedOne)
-            System.out.println("TheCursedOne");
-        if (attacker instanceof TheRipper)
-            System.out.println("TheRipper");
 
         ObjectNode node = errorfunction(mapper, xOfAttacker, yOfAttacker, xOfAttacked, yOfAttacked);
 
@@ -542,28 +536,39 @@ public class Commands {
                 return;
             }
 
-            if (game.getTurn() == 1 && player2.getHasTank() == 1 && xOfAttacked != 1) {
-                node.put("error", "Attacked card is not of type 'Tank’.");
+            if (game.getTurn() == 1 && player2.getHasTank() == 1 && !attacked.getName().equals("Goliath") && !attacked.getName().equals("Warden")) {
+                node.put("error", "Attacked card is not of type 'Tank'.");
                 output.add(node);
                 return;
             }
 
-            if (game.getTurn() == 2 && player1.getHasTank() == 1 && xOfAttacked != 2) {
-                node.put("error", "Attacked card is not of type 'Tank’.");
+            if (game.getTurn() == 2 && player1.getHasTank() == 1 && !attacked.getName().equals("Goliath") && !attacked.getName().equals("Warden")) {
+                node.put("error", "Attacked card is not of type 'Tank'.");
                 output.add(node);
                 return;
             }
         }
 
-        if (attacker instanceof Disciple)
-            System.out.println("DISCIPLE");
-        if (attacker instanceof Miraj)
-            System.out.println("Miraj");
-        if (attacker instanceof TheCursedOne)
-            System.out.println("TheCursedOne");
-        if (attacker instanceof TheRipper)
-            System.out.println("TheRipper");
-        attacker.useAbility(attacker, attacked);
+        //attacker.useAbility(attacker, attacked);
+        if (attacker.getName().equals("Disciple")) {
+            attacked.addHealth(2);
+        } else if (attacker.getName().equals("Miraj")) {
+            int attackerNewHealth = attacker.getHealth();
+            int attackedNewHealth = attacked.getHealth();
+            attacker.setHealth(attackedNewHealth);
+            attacked.setHealth(attackerNewHealth);
+        } else if (attacker.getName().equals("The Ripper")) {
+            attacked.setAttack(attacked.getAttack() - 2);
+            if (attacked.getAttack() < 0)
+                attacked.setAttack(0);
+        } else if (attacker.getName().equals("The Cursed One")) {
+            int health = attacked.getHealth();
+            int attack = attacked.getAttack();
+            attacked.setAttack(health);
+            attacked.setHealth(attack);
+        }
+
+        attacker.setHasAttacked(true);
 
         if (attacked.getHealth() < 1) {
             table.getCards().get(xOfAttacked).remove(yOfAttacked);
@@ -582,21 +587,23 @@ public class Commands {
             }
 
             currentPlayer.setHasTank(tank);
+
+            game.analyzeTank(player1, player2, table);
         }
     }
     public ObjectNode errorfunction(ObjectMapper mapper, int xOfAttacker, int yOfAttacker, int xOfAttacked, int yOfAttacked) {
         ObjectNode node = mapper.createObjectNode();
         node.put("command", "cardUsesAbility");
 
-        ObjectNode attackerNode = mapper.createObjectNode();
-        attackerNode.put("x", xOfAttacker);
-        attackerNode.put("y", yOfAttacker);
-        node.set("cardAttacker", attackerNode);
-
         ObjectNode attackedNode = mapper.createObjectNode();
         attackedNode.put("x", xOfAttacked);
         attackedNode.put("y", yOfAttacked);
         node.set("cardAttacked", attackedNode);
+
+        ObjectNode attackerNode = mapper.createObjectNode();
+        attackerNode.put("x", xOfAttacker);
+        attackerNode.put("y", yOfAttacker);
+        node.set("cardAttacker", attackerNode);
 
         return node;
     }
@@ -613,20 +620,24 @@ public class Commands {
 
         if (currentPlayer.getMana() < hero.getCostMana()) {
             node.put("error", "Not enough mana to use hero's ability.");
+            output.add(node);
             return;
         }
 
         if (hero.isHasAttacked()) {
             node.put("error", "Hero has already attacked this turn.");
+            output.add(node);
             return;
         }
 
         if (hero.getName().equals("Lord Royce") || hero.getName().equals("Empress Thorina")) {
             if (game.getTurn() == 1 && actionInput.getAffectedRow() > 1) {
                 node.put("error", "Selected row does not belong to the enemy.");
+                output.add(node);
                 return;
             } else if (game.getTurn() == 2 && actionInput.getAffectedRow() < 2) {
                 node.put("error", "Selected row does not belong to the enemy.");
+                output.add(node);
                 return;
             }
         }
@@ -634,14 +645,45 @@ public class Commands {
         if (hero.getName().equals("General Kocioraw") || hero.getName().equals("King Mudface")) {
             if (game.getTurn() == 1 && actionInput.getAffectedRow() < 2) {
                 node.put("error", "Selected row does not belong to the current player.");
+                output.add(node);
                 return;
             } else if (game.getTurn() == 2 && actionInput.getAffectedRow() > 1) {
                 node.put("error", "Selected row does not belong to the current player.");
+                output.add(node);
                 return;
             }
         }
 
-        hero.useAbility(table, actionInput.getAffectedRow());
+        // hero.useAbility(table, actionInput.getAffectedRow());
+        int row = actionInput.getAffectedRow();
+        if (hero.getName().equals("Empress Thorina")) {
+            Card destroy = table.getCards().get(row).get(0);
+            for (int i = 0; i < table.getCards().get(row).size(); i++) {
+                Card card = table.getCards().get(row).get(i);
+                if (card.getHealth() > destroy.getHealth()) {
+                    destroy = card;
+                }
+            }
+            table.getCards().get(row).remove(destroy);
+        } else if (hero.getName().equals("Lord Royce")) {
+            for (int i = 0; i < table.getCards().get(row).size(); i++) {
+                Card card = table.getCards().get(row).get(i);
+                card.setFrozen(true);
+            }
+        } else if (hero.getName().equals("General Kocioraw")) {
+            for (int i = 0; i < table.getCards().get(row).size(); i++) {
+                Card card = table.getCards().get(row).get(i);
+                card.setAttack(card.getAttack() + 1);
+            }
+        } else if (hero.getName().equals("King Mudface")) {
+            for (int i = 0; i < table.getCards().get(row).size(); i++) {
+                Card card = table.getCards().get(row).get(i);
+                card.setHealth(card.getHealth() + 1);
+            }
+        }
+
+        hero.setHasAttacked(true);
+        currentPlayer.addMana(-hero.getCostMana());
 
         if (hero.getName().equals("Empress Thorina")) {
             currentPlayer = player1;
@@ -658,6 +700,7 @@ public class Commands {
             }
 
             currentPlayer.setHasTank(tank);
+            game.analyzeTank(player1, player2, table);
         }
     }
 
